@@ -8,4 +8,7 @@ info that it needs to make the game work and playable.
 
 
 class Game:
+    """
+    Game class
+    """
     pass
