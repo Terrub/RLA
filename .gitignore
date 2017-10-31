@@ -2,3 +2,6 @@
 
 # IntelliJ project files
 .idea
+
+# python cache
+.cache
