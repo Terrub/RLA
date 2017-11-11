@@ -111,7 +111,8 @@ class Game:
 
             for y in range(world.height):
                 for x in range(world.width):
-                    floor = world.get_tile_at(x, y, z)
+                    key = world.get_tile_key_from(x, y, z)
+                    floor = world.get_tile_at(key, y)
                     path = '{}.png'.format(floor.type)
                     img_floor = image(path)
                     calculated_x = x * unit
