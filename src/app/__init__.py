@@ -1,4 +1,8 @@
 # coding=utf-8
+"""
+Initiation of the applet that starts the game using python
+"""
+
 import random
 
 from pyglet.window import Window
@@ -26,13 +30,13 @@ class Camera:
     Camera Class
     """
 
-    def __init__(self, point):
+    def __init__(self, x, y, z):
         """
         Constructor
         """
-        self.x = point.x
-        self.y = point.y
-        self.z = point.z
+        self.x = x
+        self.y = y
+        self.z = z
 
 
 def main():
@@ -42,11 +46,11 @@ def main():
     win_width = 800
     win_height = 600
     random.seed(1)
-    world = World(random)
+    world = World(random, 128, 128)
     window = Window(width=win_width, height=win_height, vsync=True)
+    # window = Window(fullscreen=True, vsync=True)
 
-    camera_point = Point(0, 0, 0)
-    camera = Camera(camera_point)
+    camera = Camera(0, 0, 0)
 
     game = Game(world=world, window=window, camera=camera)
     game.start()

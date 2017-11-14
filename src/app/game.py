@@ -31,31 +31,63 @@ class Game:
         self.sprites = {}
         self.unit = 16
 
-    def on_key_press(self, symbol: int, modifiers: int) -> None:
-        """
-        Key press handler for pyglet window
-        """
-        unit = self.unit
-        if symbol == key.LEFT:
-            self.camera.x += -unit
-        elif symbol == key.RIGHT:
-            self.camera.x += unit
-        elif symbol == key.UP:
-            self.camera.y += unit
-        elif symbol == key.DOWN:
-            self.camera.y += -unit
+    @staticmethod
+    def _move_camera_down(camera, unit):
+        new_y = max(camera.y - 4, 0)
+        camera.y = new_y
 
-    def start(self) -> None:
+    @staticmethod
+    def _move_camera_up(calculated_height, camera, unit):
+        new_y = min(camera.y + 4, calculated_height)
+        camera.y = new_y
+
+    @staticmethod
+    def _move_camera_right(calculated_width, camera, unit):
+        new_x = camera.x + 4
+        if new_x >= calculated_width:
+            new_x = 0
+        camera.x = new_x
+
+    @staticmethod
+    def _move_camera_left(calculated_width, camera, unit):
+        new_x = camera.x - 4
+        if new_x <= 0:
+            new_x = calculated_width
+        camera.x = new_x
+
+    def start(self):
         """
         Starts the current game object and main loop
         """
         window = self.window
-        window.push_handlers(self.on_key_press)
+        self.pressed_keys = key.KeyStateHandler()
+        window.push_handlers(self.pressed_keys)
         while not window.has_exit:
             window.dispatch_events()
+            self.validate_camera()
             self.render_to_window()
 
-    def render_to_window(self) -> None:
+    def validate_camera(self):
+        pressed = self.pressed_keys
+        unit = self.unit
+        camera = self.camera
+        world = self.world
+        window = self.window
+
+        calculated_width = world.width * unit
+        calculated_height = world.height * unit - window.height
+
+        if pressed[key.LEFT] and not pressed[key.RIGHT]:
+            self._move_camera_left(calculated_width, camera, unit)
+        elif pressed[key.RIGHT] and not pressed[key.LEFT]:
+            self._move_camera_right(calculated_width, camera, unit)
+
+        if pressed[key.UP] and not pressed[key.DOWN]:
+            self._move_camera_up(calculated_height, camera, unit)
+        elif pressed[key.DOWN] and not pressed[key.UP]:
+            self._move_camera_down(camera, unit)
+
+    def render_to_window(self):
         """
         Renders the game to the current window
         """
@@ -83,35 +115,40 @@ class Game:
 
         window.flip()
 
-    def draw_world(self) -> None:
+    def draw_world(self):
         """
         Draws the world
         """
         sprite_batch = self.get_sprite_batch()
         sprite_batch.draw()
 
-    def draw_hud(self) -> None:
+    def draw_hud(self):
         """
         Draws the hud
         """
         pass
 
-    def get_sprite_batch(self) -> Batch:
+    def get_sprite_batch(self):
         """
         Getter for a new sprite batch
         """
-        world = self.world
-        unit = self.unit
-
         if self.sprite_batch is None:
+            world = self.world
+            unit = self.unit
+            window = self.window
+            sprites = self.sprites
+
             sprite_batch = Batch()
             floor_group = OrderedGroup(0)
-            sprites = self.sprites
+
+            width = world.width
+            height = world.height
             z = 0
 
-            for y in range(world.height):
-                for x in range(world.width):
-                    key = world.get_tile_key_from(x, y, z)
+            for y in range(height):
+                for x in range(width + (window.width // unit)):
+                    offset_x = x % width
+                    key = world.get_tile_key_from(offset_x, y, z)
                     floor = world.get_tile_at(key, y)
                     path = '{}.png'.format(floor.type)
                     img_floor = image(path)
@@ -123,7 +160,7 @@ class Game:
                         y=calculated_y,
                         batch=sprite_batch,
                         group=floor_group)
-                    sprites[floor.id] = sprite
+                    sprites[(x, y)] = sprite
 
             self.sprite_batch = sprite_batch
 

@@ -10,7 +10,7 @@ class Tile:
     The World tile class
     """
 
-    def __init__(self, p_type: str, p_id: int) -> None:
+    def __init__(self, p_type, p_id):
         """
         Constructor
         """
@@ -23,22 +23,18 @@ class World:
     The world class
     """
 
-    def __init__(self, randomiser) -> None:
+    def __init__(self, randomiser, width, height):
         """
         Constructor
         """
-        self.surface_radius = 1
-        self.entities = []
-        self.height = 64
-        self.width = 64
-        self.depth = 1
-        self.tiles = {}
-        self.changed = True
-
+        self.height = width
+        self.width = height
         self.randomiser = randomiser
 
+        self.tiles = {}
+
     @staticmethod
-    def _create_tile(randomiser, key, h, y) -> Tile:
+    def _create_tile(randomiser, key, h, y):
         """
         Creates a tile for given key, height and y position.
         """
@@ -48,7 +44,7 @@ class World:
         return tile
 
     @staticmethod
-    def _calculate_tile_type(randomiser, h, y) -> str:
+    def _calculate_tile_type(randomiser, h, y):
         """
         Returns the tile type based on local algorithm and given params.
         """
@@ -57,7 +53,7 @@ class World:
 
         return tile_type
 
-    def get_tile_key_from(self, x, y, z) -> int:
+    def get_tile_key_from(self, x, y, z):
         """
         Returns the tile key for given coordinates.
         """
@@ -65,7 +61,7 @@ class World:
         w = self.width
         return (z * h * w) + (y * w) + x
 
-    def get_tile_at(self, key, y) -> Tile:
+    def get_tile_at(self, key, y):
         """
         Returns tile info for given coordinates.
         """
